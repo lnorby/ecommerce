@@ -1,18 +1,54 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
-  theme: {
-    extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+   content: [
+      './pages/**/*.{js,ts,jsx,tsx,mdx}',
+      './components/**/*.{js,ts,jsx,tsx,mdx}',
+      './app/**/*.{js,ts,jsx,tsx,mdx}',
+   ],
+   theme: {
+      backgroundColor: ({ theme }) => ({
+         ...theme('colors'),
+         transparent: 'transparent',
+      }),
+      borderColor: ({ theme }) => ({
+         ...theme('colors'),
+         transparent: 'transparent',
+      }),
+      borderRadius: {
+         none: '0',
+         full: '9999px',
       },
-    },
-  },
-  plugins: [],
-}
+      colors: {
+         accent: {
+            primary: '',
+         },
+      },
+      container: ({ theme }) => ({
+         center: true,
+         padding: '1.25rem',
+         screens: {
+            sm: theme('screens.sm'),
+            md: theme('screens.md'),
+            lg: theme('screens.lg'),
+            xl: theme('screens.xl'),
+            '2xl': theme('screens.2xl'),
+         },
+      }),
+      fontFamily: {
+         primary: 'var(--font-inter)',
+      },
+      fontSize: {
+         xs: '0.75rem',
+         sm: '0.875rem',
+         base: '1rem',
+         lg: '1.125rem',
+      },
+      textColor: ({ theme }) => ({
+         ...theme('colors'),
+         normal: '#000',
+         transparent: 'transparent',
+      }),
+      extend: {},
+   },
+   plugins: [],
+};

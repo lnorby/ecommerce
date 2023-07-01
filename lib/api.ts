@@ -1,19 +1,12 @@
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+async function makeRequest<T>(url: string, options: RequestInit): Promise<T> {
+   // TODO: extend headers
+   options.headers = {
+      Authorization:
+         'Basic ' +
+         btoa(`${process.env.NEXT_PUBLIC_WP_API_KEY}:${process.env.NEXT_PUBLIC_WP_API_SECRET}`),
+   };
 
-async function makeRequest<T>(url: string, method: HttpMethod, options: object): Promise<T> {
-   const isDefaultUrl = !url.match(/^https?:\/\//);
-
-   if (isDefaultUrl) {
-      options.headers = {
-         Authorization: 'Basic ' + btoa(`${process.env.WP_API_KEY}:${process.env.WP_API_SECRET}`),
-         ...(options.headers ?? {}),
-      };
-   }
-
-   const response = await fetch((isDefaultUrl ? process.env.WP_API_URL : '') + url, {
-      method,
-      ...options,
-   });
+   const response = await fetch(process.env.NEXT_PUBLIC_WP_API_URL + url, options);
 
    if (!response.ok) {
       throw new Error('Failed to fetch data.');
@@ -23,19 +16,23 @@ async function makeRequest<T>(url: string, method: HttpMethod, options: object):
 }
 
 export const api = {
-   get<T>(url: string, options: object = {}): Promise<T> {
-      return makeRequest<T>(url, 'GET', options);
+   get<T>(url: string, options: Omit<RequestInit, 'method'> = {}): Promise<T> {
+      return makeRequest<T>(url, { ...options, method: 'GET' });
    },
-   post<T>(url: string, data: any, options: object = {}): Promise<T> {
-      return makeRequest<T>(url, 'POST', { ...options, data });
+   post<T>(url: string, data: any, options: Omit<RequestInit, 'method' | 'body'> = {}): Promise<T> {
+      return makeRequest<T>(url, { ...options, method: 'POST', body: data });
    },
-   patch<T>(url: string, data: any, options: object = {}): Promise<T> {
-      return makeRequest<T>(url, 'PATCH', { ...options, data });
+   patch<T>(
+      url: string,
+      data: any,
+      options: Omit<RequestInit, 'method' | 'body'> = {}
+   ): Promise<T> {
+      return makeRequest<T>(url, { ...options, method: 'PATCH', body: data });
    },
-   put<T>(url: string, data: any, options: object = {}): Promise<T> {
-      return makeRequest<T>(url, 'PUT', { ...options, data });
+   put<T>(url: string, data: any, options: Omit<RequestInit, 'method' | 'body'> = {}): Promise<T> {
+      return makeRequest<T>(url, { ...options, method: 'PUT', body: data });
    },
-   delete<T>(url: string, options: object = {}): Promise<T> {
-      return makeRequest<T>(url, 'DELETE', options);
+   delete<T>(url: string, options: Omit<RequestInit, 'method'> = {}): Promise<T> {
+      return makeRequest<T>(url, { ...options, method: 'DELETE' });
    },
 };
