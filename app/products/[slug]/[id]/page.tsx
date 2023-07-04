@@ -29,9 +29,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 }
 
 export async function generateStaticParams() {
-   const products = await fetchProducts();
+   const productsResponse = await fetchProducts();
 
-   return products.map((product) => ({
+   return productsResponse.products.map((product) => ({
       slug: product.slug,
       id: product.id.toString(),
    }));

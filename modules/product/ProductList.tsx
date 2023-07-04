@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-import { Product } from '@/modules/product/models';
 import ProductItem from '@/modules/product/ProductItem';
 
 interface ProductListProps {
@@ -14,7 +13,7 @@ interface ProductListProps {
 
 export default function ProductList({
    products,
-   layout: initialLayout = 'vertical',
+   layout: initialLayout = 'horizontal',
    layoutSelectable,
 }: ProductListProps) {
    const [layout, setLayout] = useState(initialLayout);

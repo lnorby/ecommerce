@@ -1,33 +1,45 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useQuery } from 'react-query';
+import { useRouter } from 'next/navigation';
 
 import { fetchProducts } from '@/modules/product/api';
 import ProductList from '@/modules/product/ProductList';
 import Heading from '@/components/Heading';
+import Pagination from '@/components/Pagination';
 
-interface ProductSearchPageProps {}
+interface ProductSearchPageProps {
+   searchParams: {
+      q: string;
+      page?: string;
+   };
+}
 
-export default function ProductSearchPage({}: ProductSearchPageProps) {
-   // TODO: pagination
-   const searchParams = useSearchParams();
-   const searchQuery = searchParams.get('q') as string;
+export default async function ProductSearchPage({ searchParams }: ProductSearchPageProps) {
+   const router = useRouter();
+   const page = searchParams.page ? parseInt(searchParams.page) : 1;
 
-   const { isLoading, data: products } = useQuery({
-      queryFn: () => fetchProducts({ filters: { search: searchQuery } }),
-      queryKey: ['search-products', searchQuery],
+   const productsResponse = await fetchProducts({
+      filters: { search: searchParams.q },
+      perPage: 20,
+      page,
    });
 
    return (
       <div className="container">
          <Heading as="h1" style="h1" className="mb-5">
-            Keresés: {searchQuery}
+            Keresés: {searchParams.q}
          </Heading>
-         {isLoading ? (
-            <p>Egy pillanat...</p>
-         ) : products ? (
-            <ProductList products={products} layoutSelectable={true} />
+         {productsResponse.products ? (
+            <>
+               <ProductList products={productsResponse.products} layoutSelectable={true} />
+               <Pagination
+                  activePage={page}
+                  totalPages={productsResponse.totalPages}
+                  onChange={(page) =>
+                     router.push(`/products/search?q=${searchParams.q}&page=${page}`)
+                  }
+               />
+            </>
          ) : (
             <p>Nincs találat.</p>
          )}

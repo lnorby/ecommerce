@@ -8,14 +8,19 @@ interface ProductCategoryPageProps {
       slug: string;
       id: number;
    };
+   // searchParams: {
+   //    page?: number;
+   // };
 }
 
 export default async function ProductCategoryPage({ params }: ProductCategoryPageProps) {
    const category = await fetchCategoryById(params.id);
-   const products = await fetchProducts({
+   const productsResponse = await fetchProducts({
       filters: {
          category: category.id,
       },
+      perPage: 20,
+      page: 1,
    });
 
    return (
@@ -23,7 +28,7 @@ export default async function ProductCategoryPage({ params }: ProductCategoryPag
          <Heading as="h1" style="h1" className="mb-5">
             {category.name}
          </Heading>
-         <ProductList products={products} layoutSelectable={true} />
+         <ProductList products={productsResponse.products} layoutSelectable={true} />
       </div>
    );
 }

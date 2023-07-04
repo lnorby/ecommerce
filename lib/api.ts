@@ -1,38 +1,56 @@
-async function makeRequest<T>(url: string, options: RequestInit): Promise<T> {
-   // TODO: extend headers
-   options.headers = {
-      Authorization:
-         'Basic ' +
-         btoa(`${process.env.NEXT_PUBLIC_WP_API_KEY}:${process.env.NEXT_PUBLIC_WP_API_SECRET}`),
-   };
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-   const response = await fetch(process.env.NEXT_PUBLIC_WP_API_URL + url, options);
+class Api {
+   axiosInstance: AxiosInstance;
 
-   if (!response.ok) {
-      throw new Error('Failed to fetch data.');
+   constructor(axiosInstance: AxiosInstance) {
+      this.axiosInstance = axiosInstance;
    }
 
-   return response.json();
-}
+   get<T>(url: string, options: Omit<AxiosRequestConfig, 'url' | 'method'> = {}) {
+      return this.makeRequest<T>({ ...options, url, method: 'GET' });
+   }
 
-export const api = {
-   get<T>(url: string, options: Omit<RequestInit, 'method'> = {}): Promise<T> {
-      return makeRequest<T>(url, { ...options, method: 'GET' });
-   },
-   post<T>(url: string, data: any, options: Omit<RequestInit, 'method' | 'body'> = {}): Promise<T> {
-      return makeRequest<T>(url, { ...options, method: 'POST', body: data });
-   },
+   post<T>(
+      url: string,
+      data: any,
+      options: Omit<AxiosRequestConfig, 'url' | 'method' | 'data'> = {}
+   ) {
+      return this.makeRequest<T>({ ...options, url, method: 'POST', data });
+   }
+
    patch<T>(
       url: string,
       data: any,
-      options: Omit<RequestInit, 'method' | 'body'> = {}
-   ): Promise<T> {
-      return makeRequest<T>(url, { ...options, method: 'PATCH', body: data });
+      options: Omit<AxiosRequestConfig, 'url' | 'method' | 'data'> = {}
+   ) {
+      return this.makeRequest<T>({ ...options, url, method: 'PATCH', data });
+   }
+
+   put<T>(
+      url: string,
+      data: any,
+      options: Omit<AxiosRequestConfig, 'url' | 'method' | 'data'> = {}
+   ) {
+      return this.makeRequest<T>({ ...options, url, method: 'PUT', data });
+   }
+
+   delete<T>(url: string, options: Omit<AxiosRequestConfig, 'url' | 'method'> = {}) {
+      return this.makeRequest<T>({ ...options, url, method: 'DELETE' });
+   }
+
+   private async makeRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+      return await this.axiosInstance.request(config);
+   }
+}
+
+const axiosInstance = axios.create({
+   baseURL: process.env.NEXT_PUBLIC_WP_API_URL,
+   headers: {
+      Authorization:
+         'Basic ' +
+         btoa(`${process.env.NEXT_PUBLIC_WP_API_KEY}:${process.env.NEXT_PUBLIC_WP_API_SECRET}`),
    },
-   put<T>(url: string, data: any, options: Omit<RequestInit, 'method' | 'body'> = {}): Promise<T> {
-      return makeRequest<T>(url, { ...options, method: 'PUT', body: data });
-   },
-   delete<T>(url: string, options: Omit<RequestInit, 'method'> = {}): Promise<T> {
-      return makeRequest<T>(url, { ...options, method: 'DELETE' });
-   },
-};
+});
+
+export const api = new Api(axiosInstance);

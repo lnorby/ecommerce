@@ -5,6 +5,7 @@ import { inter } from '@/app/fonts';
 import Providers from '@/app/providers';
 import { fetchCategories } from '@/modules/category/api';
 import CategoryItem from '@/modules/category/CategoryItem';
+import ProductSearchForm from '@/components/ProductSearchForm';
 
 import '@/styles/globals.css';
 
@@ -26,10 +27,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                      <CategoryItem category={category} key={category.id} />
                   ))}
                </nav>
-               <form action="/products/search" method="GET" className="ml-[100px]">
-                  <input type="text" name="q" className="border" placeholder="termék keresés" />
-                  <button type="submit">Keresés</button>
-               </form>
+               <ProductSearchForm />
             </header>
             <Providers>{children}</Providers>
          </body>

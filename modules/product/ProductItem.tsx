@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 
-import { Product } from '@/modules/product/models';
 import Price from '@/components/Price';
+import AddToCart from '@/components/AddToCart';
 
 interface ProductItemProps {
    product: Product;
@@ -33,14 +33,18 @@ export default function ProductItem({ product, layout }: ProductItemProps) {
             />
          )}
          <div className="flex-1">
-            {/*<Link href={product.url} className="extend-clickable-area">*/}
             <Link
                href={`/products/${product.slug}/${product.id}`}
                className="extend-clickable-area"
             >
+               {/*<Link*/}
+               {/*   href={`/products/${product.slug}/${product.id}`}*/}
+               {/*   className="extend-clickable-area"*/}
+               {/*>*/}
                {product.name}
             </Link>
             <Price amount={product.price} />
+            <AddToCart product={product} className="relative" />
          </div>
       </div>
    );
