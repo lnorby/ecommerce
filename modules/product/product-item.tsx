@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 
-import Price from '@/components/Price';
-import AddToCart from '@/components/AddToCart';
+import Price from '@/components/price';
+import AddToCart from '@/components/add-to-cart';
 
 interface ProductItemProps {
    product: Product;

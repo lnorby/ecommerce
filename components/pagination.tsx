@@ -1,10 +1,16 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+
 interface PaginationProps {
    activePage: number;
    totalPages: number;
-   onChange: (page: number) => void;
 }
 
-export default function Pagination({ activePage, totalPages, onChange }: PaginationProps) {
+export default function Pagination({ activePage, totalPages }: PaginationProps) {
+   const searchParams = useSearchParams();
+
    if (totalPages === 1) {
       return;
    }
@@ -18,9 +24,9 @@ export default function Pagination({ activePage, totalPages, onChange }: Paginat
                      {page}
                   </button>
                ) : (
-                  <button type="button" onClick={() => onChange(page)}>
+                  <Link href={{ query: { ...Object.fromEntries(searchParams.entries()), page } }}>
                      {page}
-                  </button>
+                  </Link>
                )}
             </li>
          ))}

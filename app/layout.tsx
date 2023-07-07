@@ -3,16 +3,12 @@ import Link from 'next/link';
 
 import { inter } from '@/app/fonts';
 import Providers from '@/app/providers';
+import { siteConfig } from '@/config/site';
 import { fetchCategories } from '@/modules/category/api';
-import CategoryItem from '@/modules/category/CategoryItem';
-import ProductSearchForm from '@/components/ProductSearchForm';
+import CategoryItem from '@/modules/category/category-item';
+import ProductSearchForm from '@/components/product-search-form';
 
 import '@/styles/globals.css';
-
-export const metadata = {
-   title: 'eCommerce',
-   description: '',
-};
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
    const productCategories = await fetchCategories();
@@ -22,7 +18,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
          <body className="font-primary leading-tight text-normal">
             <header className="flex justify-between container mb-6 py-5">
                <nav className="flex flex-1 justify-between">
-                  <Link href="/">eCommerce logó</Link>
+                  <Link href="/">{siteConfig.name} logó</Link>
                   {productCategories.map((category) => (
                      <CategoryItem category={category} key={category.id} />
                   ))}
@@ -34,3 +30,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </html>
    );
 }
+
+export const metadata = {
+   title: {
+      template: `%s | ${siteConfig.name}`,
+      default: siteConfig.name,
+   },
+   description: '',
+};

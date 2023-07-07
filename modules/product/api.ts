@@ -1,7 +1,7 @@
-import { api } from '@/lib/api';
+import { apiRequest } from '@/utils/api';
 
 export async function fetchProductById(id: number): Promise<Product> {
-   return await api.get<any>(`/wc/v3/products/${id}`).then(({ data }) => ({
+   return await apiRequest<any>(`/wc/v3/products/${id}`).then(({ data }) => ({
       id: data.id,
       name: data.name,
       slug: data.slug,
@@ -47,7 +47,7 @@ export async function fetchProducts({
    urlParams.append('page', page.toString());
    urlParams.append('per_page', perPage.toString());
 
-   return await api.get<any>(`/wc/v3/products?${urlParams.toString()}`).then((response) => {
+   return await apiRequest<any>(`/wc/v3/products?${urlParams.toString()}`).then((response) => {
       return {
          products: response.data.map((productData: any) => ({
             id: productData.id,
@@ -56,7 +56,7 @@ export async function fetchProducts({
             price: productData.price,
             images: productData.images?.map((imageData: any) => imageData.src) ?? [],
          })),
-         totalPages: parseInt(response.headers['x-wp-totalpages']),
+         totalPages: parseInt(response.headers.get('x-wp-totalpages') ?? ''),
       };
    });
 }

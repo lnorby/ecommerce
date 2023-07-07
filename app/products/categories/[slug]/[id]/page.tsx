@@ -1,26 +1,32 @@
 import { fetchProducts } from '@/modules/product/api';
-import { fetchCategories, fetchCategoryById } from '@/modules/category/api';
-import Heading from '@/components/Heading';
-import ProductList from '@/modules/product/ProductList';
+import { fetchCategoryById } from '@/modules/category/api';
+import Heading from '@/components/heading';
+import ProductList from '@/modules/product/product-list';
+import Pagination from '@/components/pagination';
 
 interface ProductCategoryPageProps {
    params: {
       slug: string;
       id: number;
    };
-   // searchParams: {
-   //    page?: number;
-   // };
+   searchParams: {
+      page?: string;
+   };
 }
 
-export default async function ProductCategoryPage({ params }: ProductCategoryPageProps) {
+export default async function ProductCategoryPage({
+   params,
+   searchParams,
+}: ProductCategoryPageProps) {
    const category = await fetchCategoryById(params.id);
+   const page = searchParams.page ? parseInt(searchParams.page) : 1;
+
    const productsResponse = await fetchProducts({
       filters: {
          category: category.id,
       },
       perPage: 20,
-      page: 1,
+      page,
    });
 
    return (
@@ -29,15 +35,18 @@ export default async function ProductCategoryPage({ params }: ProductCategoryPag
             {category.name}
          </Heading>
          <ProductList products={productsResponse.products} layoutSelectable={true} />
+         <Pagination activePage={page} totalPages={productsResponse.totalPages} />
       </div>
    );
 }
 
-export async function generateStaticParams() {
-   const categories = await fetchCategories();
+// export async function generateStaticParams() {
+//    const categories = await fetchCategories();
+//
+//    return categories.map((category) => ({
+//       slug: category.slug,
+//       id: category.id.toString(),
+//    }));
+// }
 
-   return categories.map((category) => ({
-      slug: category.slug,
-      id: category.id.toString(),
-   }));
-}
+export const revalidate = 3600;

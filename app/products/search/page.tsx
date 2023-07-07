@@ -1,11 +1,7 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
-
 import { fetchProducts } from '@/modules/product/api';
-import ProductList from '@/modules/product/ProductList';
-import Heading from '@/components/Heading';
-import Pagination from '@/components/Pagination';
+import ProductList from '@/modules/product/product-list';
+import Heading from '@/components/heading';
+import Pagination from '@/components/pagination';
 
 interface ProductSearchPageProps {
    searchParams: {
@@ -15,7 +11,6 @@ interface ProductSearchPageProps {
 }
 
 export default async function ProductSearchPage({ searchParams }: ProductSearchPageProps) {
-   const router = useRouter();
    const page = searchParams.page ? parseInt(searchParams.page) : 1;
 
    const productsResponse = await fetchProducts({
@@ -32,13 +27,7 @@ export default async function ProductSearchPage({ searchParams }: ProductSearchP
          {productsResponse.products ? (
             <>
                <ProductList products={productsResponse.products} layoutSelectable={true} />
-               <Pagination
-                  activePage={page}
-                  totalPages={productsResponse.totalPages}
-                  onChange={(page) =>
-                     router.push(`/products/search?q=${searchParams.q}&page=${page}`)
-                  }
-               />
+               <Pagination activePage={page} totalPages={productsResponse.totalPages} />
             </>
          ) : (
             <p>Nincs találat.</p>

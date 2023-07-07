@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-import ProductItem from '@/modules/product/ProductItem';
+import ProductItem from '@/modules/product/product-item';
 
 interface ProductListProps {
    products: Product[];
