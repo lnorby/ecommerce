@@ -17,18 +17,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
    const product = await fetchProductById(params.id);
 
    return (
-      <div className="container">
-         <Heading as="h1" style="h1" className="mb-5">
-            {product.name}
-         </Heading>
-         {product.images &&
-            product.images.map((image) => (
-               <Image src={image} width={600} height={600} alt={product.name} key={image} />
-            ))}
-         <Price amount={product.price} />
-         <Suspense fallback={<p>Betöltés...</p>}>
-            <CategorySelect />
-         </Suspense>
+      <div className="container flex space-x-10">
+         <div className="flex-1 max-w-[500px]">
+            <div className="relative pt-[75%]">
+               {product.images.map((image) => (
+                  <Image
+                     src={image}
+                     fill
+                     objectFit="cover"
+                     alt={product.name}
+                     key={image}
+                     priority
+                  />
+               ))}
+            </div>
+         </div>
+         <div className="flex-1">
+            <Heading as="h1" style="h1" className="mb-5">
+               {product.name}
+            </Heading>
+            <Price amount={product.price} />
+            <Suspense fallback={<p>Betöltés...</p>}>
+               <CategorySelect />
+            </Suspense>
+         </div>
       </div>
    );
 }
@@ -41,8 +53,6 @@ export async function generateStaticParams() {
       id: product.id.toString(),
    }));
 }
-
-export const revalidate = 3600;
 
 export async function generateMetadata({ params }: ProductPageProps) {
    const product = await fetchProductById(params.id);

@@ -1,13 +1,15 @@
-import { apiRequest } from '@/utils/api';
+import { api } from '@/utils/api';
 
 export async function fetchProductById(id: number): Promise<Product> {
-   return await apiRequest<any>(`/wc/v3/products/${id}`).then(({ data }) => ({
+   const { data } = await api.get<any>(`/wc/v3/products/${id}`, 300);
+
+   return {
       id: data.id,
       name: data.name,
       slug: data.slug,
       price: data.price,
       images: data.images?.map((imageData: any) => imageData.src) ?? [],
-   }));
+   };
 }
 
 interface FetchProductsProps {
@@ -47,16 +49,16 @@ export async function fetchProducts({
    urlParams.append('page', page.toString());
    urlParams.append('per_page', perPage.toString());
 
-   return await apiRequest<any>(`/wc/v3/products?${urlParams.toString()}`).then((response) => {
-      return {
-         products: response.data.map((productData: any) => ({
-            id: productData.id,
-            name: productData.name,
-            slug: productData.slug,
-            price: productData.price,
-            images: productData.images?.map((imageData: any) => imageData.src) ?? [],
-         })),
-         totalPages: parseInt(response.headers.get('x-wp-totalpages') ?? ''),
-      };
-   });
+   const response = await api.get<any>(`/wc/v3/products?${urlParams.toString()}`, 300);
+
+   return {
+      products: response.data.map((productData: any) => ({
+         id: productData.id,
+         name: productData.name,
+         slug: productData.slug,
+         price: productData.price,
+         images: productData.images?.map((imageData: any) => imageData.src) ?? [],
+      })),
+      totalPages: parseInt(response.headers.get('x-wp-totalpages') ?? ''),
+   };
 }

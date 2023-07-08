@@ -24,7 +24,7 @@ export default async function ProductSearchPage({ searchParams }: ProductSearchP
          <Heading as="h1" style="h1" className="mb-5">
             Keresés: {searchParams.q}
          </Heading>
-         {productsResponse.products ? (
+         {productsResponse.products.length ? (
             <>
                <ProductList products={productsResponse.products} layoutSelectable={true} />
                <Pagination activePage={page} totalPages={productsResponse.totalPages} />

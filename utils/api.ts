@@ -3,27 +3,57 @@ interface ApiResponse<T> {
    data: T;
 }
 
-export async function apiRequest<T>(
-   url: string,
-   config: RequestInit = {}
-): Promise<ApiResponse<T>> {
-   // TODO: extend, dont overwrite
-   config.headers = {
-      Authorization: 'Basic ' + btoa(`${process.env.WP_API_KEY}:${process.env.WP_API_SECRET}`),
-   };
+class Api {
+   get<T>(url: string, revalidate?: number, config: RequestInit = {}) {
+      config = { ...config, method: 'GET' };
 
-   const response = await fetch(process.env.WP_API_URL + url, config);
+      if (revalidate) {
+         config = { ...config, next: { revalidate } };
+      }
 
-   if (!response.ok) {
-      throw new Error('Failed to fetch data.');
+      return Api.makeRequest<T>(url, config);
    }
 
-   const data = await response.json();
+   post<T>(url: string, data: any, config: RequestInit = {}) {
+      return Api.makeRequest<T>(url, { ...config, method: 'POST', body: JSON.stringify(data) });
+   }
 
-   return new Promise<ApiResponse<T>>((resolve) =>
-      resolve({
+   put<T>(url: string, data: any, config: RequestInit = {}) {
+      return Api.makeRequest<T>(url, { ...config, method: 'PUT', body: JSON.stringify(data) });
+   }
+
+   patch<T>(url: string, data: any, config: RequestInit = {}) {
+      return Api.makeRequest<T>(url, { ...config, method: 'PATCH', body: JSON.stringify(data) });
+   }
+
+   delete<T>(url: string, config: RequestInit = {}) {
+      return Api.makeRequest<T>(url, { ...config, method: 'DELETE' });
+   }
+
+   static async makeRequest<T>(url: string, config: RequestInit = {}): Promise<ApiResponse<T>> {
+      // @ts-ignore
+      config = {
+         ...config,
+         headers: {
+            ...config.headers,
+            Authorization:
+               'Basic ' + btoa(`${process.env.WP_API_KEY}:${process.env.WP_API_SECRET}`),
+         },
+      };
+
+      const response = await fetch(process.env.WP_API_URL + url, config);
+
+      if (!response.ok) {
+         throw new Error('API request failed.');
+      }
+
+      const data = await response.json();
+
+      return {
          headers: response.headers,
          data,
-      })
-   );
+      };
+   }
 }
+
+export const api = new Api();

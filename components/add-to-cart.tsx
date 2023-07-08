@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { apiRequest } from '@/utils/api';
+import { api } from '@/utils/api';
 
 interface AddToCartProps {
    className?: string;
@@ -14,12 +14,9 @@ export default function AddToCart({ className, product }: AddToCartProps) {
    async function addToCart() {
       setIsAdding(true);
 
-      const response = await apiRequest('/wc/store/v1/cart/add-item', {
-         method: 'POST',
-         body: JSON.stringify({
-            id: product.id,
-            quantity: 1,
-         }),
+      const response = await api.post('/wc/store/v1/cart/add-item', {
+         id: product.id,
+         quantity: 1,
       });
 
       console.log(response);

@@ -49,4 +49,10 @@ export default async function ProductCategoryPage({
 //    }));
 // }
 
-export const revalidate = 3600;
+export async function generateMetadata({ params }: ProductCategoryPageProps) {
+   const category = await fetchCategoryById(params.id);
+
+   return {
+      title: category.name,
+   };
+}
