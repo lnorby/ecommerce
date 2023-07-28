@@ -1,47 +1,101 @@
-import { Suspense } from 'react';
 import Image from 'next/image';
 
-import { fetchProductById, fetchProducts } from '@/modules/product/api';
-import Heading from '@/components/heading';
-import Price from '@/components/price';
-import CategorySelect from '@/components/category-select';
+import { fetchProductById, fetchProducts } from '@/app/products/api';
+import { formatPrice } from '@/app/(common)/utils/format-price';
+import { Header } from '@/app/(common)/components/layout/header';
+import { Heading } from '@/app/(common)/components/ui/heading';
+import { AddToCartForm } from '@/app/products/add-to-cart-form';
+import { Breadcrumbs } from '@/app/(common)/components/ui/breadcrumbs';
+import { TopProducts } from '@/app/(common)/components/top-products';
 
 interface ProductPageProps {
    params: {
       slug: string;
-      id: number;
+      id: string;
    };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-   const product = await fetchProductById(params.id);
+   // TODO: similar products instead of tops
+   const product = await fetchProductById(Number(params.id));
 
    return (
-      <div className="container flex space-x-10">
-         <div className="flex-1 max-w-[500px]">
-            <div className="relative pt-[75%]">
-               {product.images.map((image) => (
-                  <Image
-                     src={image}
-                     fill
-                     objectFit="cover"
-                     alt={product.name}
-                     key={image}
-                     priority
-                  />
-               ))}
-            </div>
-         </div>
-         <div className="flex-1">
-            <Heading as="h1" style="h1" className="mb-5">
+      <>
+         <Header centered>
+            <Heading as="h1" style="h3">
                {product.name}
             </Heading>
-            <Price amount={product.price} />
-            <Suspense fallback={<p>Betöltés...</p>}>
-               <CategorySelect />
-            </Suspense>
+            <Breadcrumbs
+               items={[
+                  {
+                     label: 'Nyitóoldal',
+                     url: '/',
+                  },
+                  {
+                     label: product.categories[0].name,
+                     url: `/categories/${product.categories[0].slug}/${product.categories[0].id}`,
+                  },
+                  { label: product.name },
+               ]}
+               className="mt-8"
+            />
+         </Header>
+         <div className="container-sm py-12">
+            <main>
+               <div className="flex space-x-12">
+                  <div className="flex-1 max-w-[500px]">
+                     <div className="relative pt-[100%]">
+                        {product.images.map((image) => (
+                           <Image src={image} fill alt={product.name} key={image} priority />
+                        ))}
+                     </div>
+                  </div>
+                  <div className="flex-1 p-12 bg-soft">
+                     <div className="mb-2">{product.inStock ? 'raktáron' : 'nincs raktáron'}</div>
+                     <div className="mb-5 font-bold">
+                        {product.onSale && (
+                           <del className="block text-muted">
+                              {formatPrice(product.regularPrice)}
+                           </del>
+                        )}
+                        <span className="text-4xl text-accent-primary">
+                           {formatPrice(product.price)}
+                        </span>
+                     </div>
+                     <ul className="mb-8 p-6 bg-strong">
+                        {product.attributes.map((attribute) => (
+                           <li
+                              className="flex justify-between py-2.5 border-b last:border-b-0 border-[rgba(0,0,0,0.05)]"
+                              key={attribute.id}
+                           >
+                              <span className="mr-2 text-muted">{attribute.name}:</span>
+                              <strong className="text-right">{attribute.options.join(', ')}</strong>
+                           </li>
+                        ))}
+                        {/*<li className="flex justify-between py-2.5">*/}
+                        {/*   <span className="mr-2 text-muted">Várható kiszállítás:</span>*/}
+                        {/*   <strong className="text-right">2023.08.20.</strong>*/}
+                        {/*</li>*/}
+                     </ul>
+                     <AddToCartForm product={product.id} />
+                  </div>
+               </div>
+               <Heading as="h2" style="h4" className="mt-10 mb-8">
+                  Leírás
+               </Heading>
+               <div
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  className="prose max-w-full"
+               ></div>
+            </main>
+            <aside className="mt-20">
+               <Heading as="h2" style="h4" className="mb-10">
+                  Hasonló termékek
+               </Heading>
+               <TopProducts />
+            </aside>
          </div>
-      </div>
+      </>
    );
 }
 
@@ -50,12 +104,12 @@ export async function generateStaticParams() {
 
    return productsResponse.products.map((product) => ({
       slug: product.slug,
-      id: product.id.toString(),
+      id: String(product.id),
    }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
-   const product = await fetchProductById(params.id);
+   const product = await fetchProductById(Number(params.id));
 
    return {
       title: product.name,

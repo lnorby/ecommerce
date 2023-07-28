@@ -1,7 +1,7 @@
 export default function Loading() {
    return (
-      <div className="container">
-         <p>Egy pillanat...</p>
-      </div>
+      <main className="flex flex-1 items-center justify-center">
+         <p className="font-bold text-lg text-center">Egy pillanat...</p>
+      </main>
    );
 }

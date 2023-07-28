@@ -1,26 +1,32 @@
+import '@/app/globals.css';
+
 import { ReactNode } from 'react';
-import Link from 'next/link';
 
-import { siteConfig } from '@/config/site';
-import { inter } from '@/app/fonts';
-import Providers from '@/app/providers';
-import CategoryLinks from '@/modules/category/category-links';
-import ProductSearchForm from '@/components/product-search-form';
+import { siteConfig } from '@/app/(common)/config/site';
+import { fontDMSans, fontPlayfairDisplay } from '@/app/fonts';
+import { Providers } from '@/app/providers';
+import { Navigation } from '@/app/(common)/components/layout/navigation';
+import { Footer } from '@/app/(common)/components/layout/footer';
+import { CartDialog } from '@/app/cart/cart-dialog';
 
-import '@/styles/globals.css';
+interface Props {
+   children: ReactNode;
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: Props) {
    return (
-      <html lang="hu" className={`${inter.variable}`}>
-         <body className="font-primary leading-tight text-normal">
-            <header className="flex justify-between container mb-6 py-5">
-               <nav className="flex flex-1 justify-between">
-                  <Link href="/">{siteConfig.name} logó</Link>
-                  <CategoryLinks />
-               </nav>
-               <ProductSearchForm />
-            </header>
+      <html lang="hu" className={`${fontDMSans.variable} ${fontPlayfairDisplay.variable}`}>
+         <body className="flex flex-col min-h-screen font-primary leading-tight text-normal">
+            <div className="absolute top-0 left-0 z-10 w-full">
+               <div className="container py-5">
+                  <Navigation />
+               </div>
+            </div>
             <Providers>{children}</Providers>
+            <div className="mt-auto">
+               <Footer />
+            </div>
+            <CartDialog />
          </body>
       </html>
    );

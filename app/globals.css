@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.container-sm {
+   @apply container xl:max-w-screen-xl;
+}
+
+.container-xs {
+   @apply container lg:max-w-screen-lg;
+}
+
+.extend-clickable-area::before {
+   @apply content-[''] absolute inset-0;
+}
