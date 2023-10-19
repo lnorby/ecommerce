@@ -21,12 +21,12 @@ export function ProductItem({ product }: ProductItemProps) {
          )}
          <div className="px-7 text-center">
             <Link
-               href={`/products/${product.slug}/${product.id}`}
-               className="font-bold text-lg leading-snug extend-clickable-area"
+               href={`/products/${product.slug}`}
+               className="font-bold text-lg leading-snug extended"
             >
                {/*<Link*/}
                {/*   href={`/products/${product.slug}/${product.id}`}*/}
-               {/*   className="extend-clickable-area"*/}
+               {/*   className="extended"*/}
                {/*>*/}
                {product.name}
             </Link>

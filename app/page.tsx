@@ -4,9 +4,9 @@ import Image from 'next/image';
 import { twMerge } from 'tailwind-merge';
 
 import { Heading } from '@/app/(common)/components/ui/heading';
-import { TopProducts } from '@/app/(common)/components/top-products';
 import { buttonVariants } from '@/app/(common)/components/ui/button';
 import { BackgroundImage } from '@/app/(common)/components/background-image';
+import { TopProducts } from '@/app/(common)/components/top-products';
 
 export default function HomePage() {
    return (

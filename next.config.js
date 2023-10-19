@@ -4,7 +4,7 @@ const nextConfig = {
       remotePatterns: [
          {
             protocol: 'https',
-            hostname: 'wp.laszlonorbert.hu',
+            hostname: 'teszt-uzlet.eu.saleor.cloud',
          },
       ],
    },

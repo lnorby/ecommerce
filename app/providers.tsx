@@ -1,7 +1,8 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import {ReactNode, useState} from 'react';
+import {QueryClient, QueryClientProvider} from 'react-query';
+
 // import { SessionProvider } from 'next-auth/react';
 
 export interface ProvidersProps {

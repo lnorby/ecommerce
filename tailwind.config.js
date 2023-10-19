@@ -7,13 +7,10 @@ module.exports = {
          light: '#fafafa',
          soft: '#f4f5f6',
          strong: '#e5e8eb',
-         white: '#fff',
-         transparent: 'transparent',
       }),
       borderColor: ({ theme }) => ({
          ...theme('colors'),
          soft: '#e4e5e7',
-         transparent: 'transparent',
       }),
       borderRadius: {
          none: '0',
@@ -24,6 +21,8 @@ module.exports = {
             primary: '#d74544',
          },
          error: '#e00',
+         transparent: 'transparent',
+         white: '#fff',
       },
       container: {
          center: true,
@@ -34,29 +33,24 @@ module.exports = {
          secondary: 'var(--font-playfair-display)',
       },
       fontSize: {
-         xs: '0.75rem',
-         sm: '0.875rem',
-         base: '1rem',
-         lg: '1.125rem',
-         xl: '1.25rem',
-         '2xl': '1.3125rem',
-         '3xl': '1.5rem',
-         '4xl': '1.625rem',
-         '5xl': '1.875rem',
-         '6xl': '2.375rem',
-         '7xl': '2.875rem',
-         '8xl': '4.25rem',
-      },
-      letterSpacing: {
-         normal: 0,
-         wider: '1px',
+         xs: '0.75rem', // 12px
+         sm: '0.875rem', // 14px
+         base: '1rem', // 16px
+         lg: '1.125rem', // 18px
+         xl: '1.25rem', // 20px
+         '2xl': '1.3125rem', // 21px
+         '3xl': '1.5rem', // 24px
+         '4xl': '1.625rem', // 26px
+         '5xl': '1.875rem', // 30px
+         '6xl': '2.375rem', // 38px
+         '7xl': '2.875rem', // 46px
+         '8xl': '4.25rem', // 68px
       },
       textColor: ({ theme }) => ({
          ...theme('colors'),
          normal: '#1a1a1a',
          muted: '#6d7c90',
          inverted: '#fff',
-         transparent: 'transparent',
       }),
       transitionDuration: {
          DEFAULT: '250ms',

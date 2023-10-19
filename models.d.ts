@@ -1,30 +1,45 @@
 interface Attribute {
-   id: number;
+   id: string;
    name: string;
    slug: string;
+   choices: AttributeChoice[];
 }
 
-interface AttributeTerm {
-   id: number;
+interface AttributeChoice {
+   id: string;
    name: string;
-}
-
-interface CartItem {
-   key: string;
-   id: number;
-   quantity: number;
-   name: string;
-   sku: string;
-   image: string | undefined;
-   price: number;
+   slug: string;
 }
 
 interface Category {
-   id: number;
+   id: string;
    name: string;
    slug: string;
    description: string;
-   parent: number;
+}
+
+interface Checkout {
+   id: string;
+   lines: CheckoutLine[];
+   subtotal: number;
+   total: number;
+   availablePaymentGateways: {
+      id: string;
+      name: string;
+   }[];
+}
+
+interface CheckoutLine {
+   id: string;
+   product: {
+      id: string;
+      name: string;
+      slug: string;
+      image: string | undefined;
+   };
+   quantity: number;
+   unitPrice: number;
+   totalPrice: number;
 }
 
 interface PaymentMethod {
@@ -34,31 +49,33 @@ interface PaymentMethod {
 }
 
 interface Product {
-   id: number;
+   id: string;
    name: string;
    slug: string;
    description: string;
+   variantId: string;
    price: number;
    regularPrice: number;
    onSale: boolean;
    inStock: boolean;
-   categories: {
-      id: number;
+   category: {
+      id: string;
       name: string;
       slug: string;
-   }[];
+   };
    images: string[];
    attributes: {
-      id: number;
+      id: string;
       name: string;
-      options: string[];
+      values: string[];
    }[];
 }
 
 interface ProductSummary {
-   id: number;
+   id: string;
    name: string;
    slug: string;
+   variantId: string;
    price: number;
    regularPrice: number;
    onSale: boolean;

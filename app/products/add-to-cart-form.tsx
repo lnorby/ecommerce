@@ -1,33 +1,28 @@
 'use client';
 
 import { FormEvent, useRef, useState } from 'react';
-import { shallow } from 'zustand/shallow';
 
 import { Input } from '@/app/(common)/components/form/input';
 import { Button } from '@/app/(common)/components/ui/button';
 import { useCartStore } from '@/app/cart/store';
+import { useCart } from '@/app/cart/use-cart';
 
 export interface AddToCartFormProps {
-   product: number;
+   variantId: string;
 }
 
-export function AddToCartForm({ product }: AddToCartFormProps) {
+export function AddToCartForm({ variantId }: AddToCartFormProps) {
    const inputRef = useRef<HTMLInputElement | null>(null);
    const [isAdding, setIsAdding] = useState(false);
 
-   const { openDialog, addItem } = useCartStore(
-      (state) => ({
-         openDialog: state.openDialog,
-         addItem: state.addItem,
-      }),
-      shallow
-   );
+   const openDialog = useCartStore((state) => state.openDialog);
+   const { addItem } = useCart();
 
    async function addToCart(event: FormEvent<HTMLFormElement>) {
       event.preventDefault();
 
       setIsAdding(true);
-      await addItem(product, Number(inputRef.current?.value ?? 1));
+      await addItem(variantId, Number(inputRef.current?.value ?? 1));
       setIsAdding(false);
 
       openDialog();

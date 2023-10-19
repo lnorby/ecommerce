@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { fetchProductById, fetchProducts } from '@/app/products/api';
+import { fetchProductBySlug, fetchProducts } from '@/app/products/api';
 import { formatPrice } from '@/app/(common)/utils/format-price';
 import { Header } from '@/app/(common)/components/layout/header';
 import { Heading } from '@/app/(common)/components/ui/heading';
@@ -11,13 +11,12 @@ import { TopProducts } from '@/app/(common)/components/top-products';
 interface ProductPageProps {
    params: {
       slug: string;
-      id: string;
    };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
    // TODO: similar products instead of tops
-   const product = await fetchProductById(Number(params.id));
+   const product = await fetchProductBySlug(params.slug);
 
    return (
       <>
@@ -32,8 +31,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                      url: '/',
                   },
                   {
-                     label: product.categories[0].name,
-                     url: `/categories/${product.categories[0].slug}/${product.categories[0].id}`,
+                     label: product.category.name,
+                     url: `/categories/${product.category.slug}`,
                   },
                   { label: product.name },
                ]}
@@ -69,7 +68,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                               key={attribute.id}
                            >
                               <span className="mr-2 text-muted">{attribute.name}:</span>
-                              <strong className="text-right">{attribute.options.join(', ')}</strong>
+                              <strong className="text-right">{attribute.values.join(', ')}</strong>
                            </li>
                         ))}
                         {/*<li className="flex justify-between py-2.5">*/}
@@ -77,15 +76,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         {/*   <strong className="text-right">2023.08.20.</strong>*/}
                         {/*</li>*/}
                      </ul>
-                     <AddToCartForm product={product.id} />
+                     <AddToCartForm variantId={product.variantId} />
                   </div>
                </div>
                <Heading as="h2" style="h4" className="mt-10 mb-8">
                   Leírás
                </Heading>
                <div
-                  dangerouslySetInnerHTML={{ __html: product.description }}
                   className="prose max-w-full"
+                  dangerouslySetInnerHTML={{
+                     __html: product.description,
+                  }}
                ></div>
             </main>
             <aside className="mt-20">
@@ -104,12 +105,11 @@ export async function generateStaticParams() {
 
    return productsResponse.products.map((product) => ({
       slug: product.slug,
-      id: String(product.id),
    }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
-   const product = await fetchProductById(Number(params.id));
+   const product = await fetchProductBySlug(params.slug);
 
    return {
       title: product.name,

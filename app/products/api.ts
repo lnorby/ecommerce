@@ -1,27 +1,80 @@
-import { api } from '@/app/(common)/lib/api';
+import { apiRequest } from '@/app/(common)/lib/api';
+import { convertDescriptionToHtml } from '@/app/(common)/utils/convert-description-to-html';
 
-export async function fetchProductById(id: number): Promise<Product> {
-   const { data } = await api.get<any>(`/wc/v3/products/${id}`, 300);
+export async function fetchProductBySlug(slug: string): Promise<Product> {
+   const {
+      data: { product },
+   } = await apiRequest(
+      `query GetProductBySlug($slug: String) {
+         product(slug: $slug) {
+            id
+            name
+            slug
+            description
+            variants {
+               id
+               pricing {
+                  onSale
+                  price {
+                     gross {
+                        amount
+                        currency
+                     }
+                  }
+                  priceUndiscounted {
+                     gross {
+                        amount
+                        currency
+                     }
+                  }
+               }
+            }
+            media {
+               url
+            }
+            category {
+               id
+               name
+               slug
+            }
+            isAvailableForPurchase
+            attributes {
+               values {
+                  name
+               }
+               attribute {
+                  id
+                  name
+               }
+            }
+         }
+      }`,
+      {
+         slug,
+      },
+      300
+   );
 
    return {
-      id: data.id,
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      price: data.price,
-      regularPrice: data.regular_price,
-      onSale: data.on_sale,
-      inStock: data.stock_status === 'instock',
-      categories: data.categories.map((category: any) => ({
-         id: category.id,
-         name: category.name,
-         slug: category.slug,
-      })),
-      images: data.images?.map((imageData: any) => imageData.src) ?? [],
-      attributes: data.attributes.map((attribute: any) => ({
-         id: attribute.id,
-         name: attribute.name,
-         options: attribute.options,
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: convertDescriptionToHtml(product.description),
+      variantId: product.variants[0].id,
+      price: product.variants[0].pricing.price.gross.amount,
+      regularPrice: product.variants[0].pricing.priceUndiscounted.gross.amount,
+      onSale: product.variants[0].pricing.onSale,
+      inStock: product.isAvailableForPurchase,
+      category: {
+         id: product.category.id,
+         name: product.category.name,
+         slug: product.category.slug,
+      },
+      images: product.media.map((media: any) => media.url),
+      attributes: product.attributes.map((attribute: any) => ({
+         id: attribute.attribute.id,
+         name: attribute.attribute.name,
+         values: attribute.values.map((value: any) => value.name),
       })),
    };
 }
@@ -29,81 +82,127 @@ export async function fetchProductById(id: number): Promise<Product> {
 interface FetchProductsProps {
    filters?: {
       query?: string;
-      category?: number;
-      featured?: boolean;
+      category?: string;
    };
-   orderBy?: 'date' | 'id' | 'include' | 'title' | 'slug' | 'price' | 'popularity' | 'rating';
-   order?: 'asc' | 'desc';
-   page?: number;
+   orderBy?: 'NAME' | 'RANK' | 'PRICE' | 'RATING';
+   order?: 'ASC' | 'DESC';
+   cursor?: string;
    perPage?: number;
 }
 
 interface FetchProductsResponse {
    products: ProductSummary[];
-   totalPages: number;
+   cursor: string;
+   hasNextPage: boolean;
 }
 
+// TODO: filters
 export async function fetchProducts({
-   filters = {},
-   orderBy = 'date',
-   order = 'asc',
-   page = 1,
-   perPage = 30,
+   filters,
+   orderBy,
+   order,
+   cursor,
+   perPage,
 }: FetchProductsProps = {}): Promise<FetchProductsResponse> {
-   const urlParams = new URLSearchParams();
-
-   urlParams.append('_fields', 'id,name,slug,price,regular_price,on_sale,images');
-
-   if (typeof filters?.query !== 'undefined') {
-      urlParams.append('search', filters.query);
-   }
-
-   if (typeof filters?.category !== 'undefined') {
-      urlParams.append('category', String(filters.category));
-   }
-
-   if (typeof filters?.featured !== 'undefined') {
-      urlParams.append('featured', filters.featured ? '1' : '0');
-   }
-
-   urlParams.append('orderby', String(orderBy));
-   urlParams.append('order', String(order));
-   urlParams.append('page', String(page));
-   urlParams.append('per_page', String(perPage));
-   console.log(urlParams.toString());
-
-   const response = await api.get<any>(`/wc/v3/products?${urlParams}`, 300);
+   const response = await apiRequest(
+      `query GetProducts($perPage: Int, $cursor: String, $orderBy: ProductOrderField, $order: OrderDirection!) {
+         products(first: $perPage, after: $cursor, sortBy: {field: $orderBy, direction: $order}) {
+            edges {
+               node {
+                  id
+                  name
+                  slug
+                  variants {
+                     id
+                  }
+                  pricing {
+                     onSale
+                     priceRange {
+                        start {
+                           gross {
+                              amount
+                              currency
+                           }
+                        }
+                     }
+                     priceRangeUndiscounted {
+                        start {
+                           gross {
+                              amount
+                              currency
+                           }
+                        }
+                     }
+                  }
+                  media {
+                     url
+                  }
+               }
+            }
+            pageInfo {
+               endCursor
+               hasNextPage
+            }
+         }
+      }`,
+      {
+         perPage: perPage ?? 20,
+         cursor: cursor ?? '',
+         orderBy: orderBy ?? 'NAME',
+         order: order ?? 'ASC',
+      }
+   );
 
    return {
-      products: response.data.map((productData: any) => ({
+      products: response.data.products.edges.map(({ node: productData }: any) => ({
          id: productData.id,
          name: productData.name,
          slug: productData.slug,
-         price: productData.price,
-         regularPrice: productData.regular_price,
-         onSale: productData.on_sale,
-         image: productData.images[0]?.src,
+         variantId: productData.variants[0].id,
+         price: productData.pricing.priceRange.start.gross.amount,
+         regularPrice: productData.pricing.priceRangeUndiscounted.start.gross.amount,
+         onSale: productData.pricing.onSale,
+         image: productData.media[0]?.url,
       })),
-      totalPages: Number(response.headers.get('x-wp-totalpages') ?? 1),
+      cursor: response.data.products.pageInfo.endCursor,
+      hasNextPage: response.data.products.pageInfo.hasNextPage,
    };
 }
 
 export async function fetchAttributes(): Promise<Attribute[]> {
-   const { data } = await api.get<any>(`/wc/v3/products/attributes`);
+   const response = await apiRequest(
+      `query GetAttributes {
+         attributes(first: 10) {
+            edges {
+               node {
+                  id
+                  name
+                  slug
+                  choices(first: 100) {
+                     edges {
+                        node {
+                           id
+                           name
+                           slug
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }`,
+      {},
+      3600
+   );
 
-   return data.map((attributeData: any) => ({
+   return response.data.attributes.edges.map(({ node: attributeData }: any) => ({
       id: attributeData.id,
       name: attributeData.name,
       slug: attributeData.slug,
-   }));
-}
-
-export async function fetchAttributeTerms(attribute: number): Promise<AttributeTerm[]> {
-   const { data } = await api.get<any>(`/wc/v3/products/attributes/${attribute}/terms`);
-
-   // TODO: ordering
-   return data.map((termData: any) => ({
-      id: termData.id,
-      name: termData.name,
+      choices: attributeData.choices.edges.map(({ node: choiceData }) => ({
+         id: choiceData.id,
+         name: choiceData.name,
+         slug: choiceData.slug,
+      })),
    }));
 }

@@ -2,14 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-.container-sm {
-   @apply container xl:max-w-screen-xl;
-}
+@layer utilities {
+   .container-sm {
+      @apply container xl:max-w-screen-xl;
+   }
 
-.container-xs {
-   @apply container lg:max-w-screen-lg;
-}
+   .container-xs {
+      @apply container lg:max-w-screen-lg;
+   }
 
-.extend-clickable-area::before {
-   @apply content-[''] absolute inset-0;
+   .extended::before {
+      @apply content-[''] absolute inset-0 z-10;
+   }
 }

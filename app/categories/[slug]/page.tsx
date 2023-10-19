@@ -1,9 +1,8 @@
 import { ReactNode } from 'react';
 
 import { fetchAttributes, fetchProducts } from '@/app/products/api';
-import { fetchCategories, fetchCategoryById } from '@/app/categories/api';
-import { AttributeTermSelect } from '@/app/categories/attribute-term-select';
-import { Pagination } from '@/app/(common)/components/ui/pagination';
+import { fetchCategories, fetchCategoryBySlug } from '@/app/categories/api';
+import { AttributeChoiceSelect } from '@/app/categories/attribute-choice-select';
 import { Header } from '@/app/(common)/components/layout/header';
 import { Heading } from '@/app/(common)/components/ui/heading';
 import { ProductOrderSelect } from '@/app/categories/product-order-select';
@@ -12,47 +11,44 @@ import { ProductItem } from '@/app/(common)/components/product-item';
 interface ProductCategoryPageProps {
    params: {
       slug: string;
-      id: string;
    };
    searchParams: {
-      page?: string;
       orderby?: string;
       attributes?: string;
    };
 }
 
+// TODO: pagination
 export default async function ProductCategoryPage({
    params,
    searchParams,
 }: ProductCategoryPageProps) {
-   const category = await fetchCategoryById(Number(params.id));
+   const category = await fetchCategoryBySlug(params.slug);
    const attributes = await fetchAttributes();
-
-   const page = Number(searchParams.page ?? 1);
 
    let orderBy;
    let order;
 
    switch (searchParams.orderby) {
       case 'name_asc':
-         orderBy = 'title';
-         order = 'asc';
+         orderBy = 'NAME';
+         order = 'ASC';
          break;
       case 'name_desc':
-         orderBy = 'title';
-         order = 'desc';
+         orderBy = 'NAME';
+         order = 'DESC';
          break;
       case 'price_asc':
-         orderBy = 'price';
-         order = 'asc';
+         orderBy = 'PRICE';
+         order = 'ASC';
          break;
       case 'price_desc':
-         orderBy = 'price';
-         order = 'desc';
+         orderBy = 'PRICE';
+         order = 'DESC';
          break;
       default:
-         orderBy = 'date';
-         order = 'asc';
+         orderBy = 'NAME';
+         order = 'ASC';
    }
 
    const attributesFilter = searchParams.attributes ? JSON.parse(searchParams.attributes) : {};
@@ -64,7 +60,6 @@ export default async function ProductCategoryPage({
       orderBy,
       order,
       perPage: 20,
-      page,
    });
 
    return (
@@ -74,7 +69,12 @@ export default async function ProductCategoryPage({
                {category.name}
             </Heading>
             {category.description && (
-               <p className="mt-6 text-lg leading-normal">{category.description}</p>
+               <div
+                  className="mt-6 text-lg leading-normal"
+                  dangerouslySetInnerHTML={{
+                     __html: category.description,
+                  }}
+               ></div>
             )}
          </Header>
          <div className="flex container py-12 space-x-12">
@@ -92,13 +92,12 @@ export default async function ProductCategoryPage({
                ) : (
                   <p>Nincs ilyen termék.</p>
                )}
-               <Pagination totalPages={3} className="mt-20" />
             </main>
             <aside className="w-[19rem] shrink-0 space-y-4">
                {/*<Card title="Ár"></Card>*/}
                {attributes.map((attribute) => (
                   <Card title={attribute.name} key={attribute.id}>
-                     <AttributeTermSelect attribute={attribute} />
+                     <AttributeChoiceSelect attribute={attribute} />
                   </Card>
                ))}
             </aside>
@@ -126,12 +125,11 @@ export async function generateStaticParams() {
 
    return categories.map((category) => ({
       slug: category.slug,
-      id: String(category.id),
    }));
 }
 
 export async function generateMetadata({ params }: ProductCategoryPageProps) {
-   const category = await fetchCategoryById(Number(params.id));
+   const category = await fetchCategoryBySlug(params.slug);
 
    return {
       title: category.name,

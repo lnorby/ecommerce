@@ -1,6 +1,5 @@
 'use client';
 
-import { useQuery } from 'react-query';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,10 +10,9 @@ import { Breadcrumbs } from '@/app/(common)/components/ui/breadcrumbs';
 import { FormField } from '@/app/(common)/components/form/form-field';
 import { Input } from '@/app/(common)/components/form/input';
 import { Button } from '@/app/(common)/components/ui/button';
-import { useCartStore } from '@/app/cart/store';
 import { formatPrice } from '@/app/(common)/utils/format-price';
-import { fetchPaymentMethods } from '@/app/(common)/api/payment-methods';
 import { Choice } from '@/app/(common)/components/form/choice';
+import { useCart } from '@/app/cart/use-cart';
 
 const validationSchema = z.object({
    firstName: z.string().min(1),
@@ -25,7 +23,7 @@ const validationSchema = z.object({
    address: z.string().min(1),
    phone: z.string().min(1),
    email: z.string().email(),
-   paymentMethod: z.string().min(1),
+   paymentGateway: z.string().min(1),
 });
 
 export interface CheckoutPageProps {}
@@ -39,8 +37,7 @@ export default function CheckoutPage({}: CheckoutPageProps) {
       resolver: zodResolver(validationSchema),
    });
 
-   const { items, total } = useCartStore((state) => ({ items: state.items, total: state.total }));
-   const { data: paymentMethods } = useQuery('paymentMethods', fetchPaymentMethods);
+   const { items, total, availablePaymentGateways } = useCart();
 
    function sendData(formData: z.infer<typeof validationSchema>) {
       console.log(formData);
@@ -102,13 +99,11 @@ export default function CheckoutPage({}: CheckoutPageProps) {
                      </thead>
                      <tbody>
                         {items.map((item) => (
-                           <tr key={item.key}>
+                           <tr key={item.id}>
                               <td className="pb-6">
-                                 {item.name} <strong>× {item.quantity}</strong>
+                                 {item.product.name} <strong>× {item.quantity}</strong>
                               </td>
-                              <td className="pb-6 pr-5">
-                                 {formatPrice(item.price * item.quantity)}
-                              </td>
+                              <td className="pb-6 pr-5">{formatPrice(item.totalPrice)}</td>
                            </tr>
                         ))}
                      </tbody>
@@ -125,17 +120,17 @@ export default function CheckoutPage({}: CheckoutPageProps) {
                   </table>
                </div>
                <div className="mb-10 space-y-3.5 text-lg">
-                  {paymentMethods?.map((paymentMethod) => (
+                  {availablePaymentGateways.map((paymentGateway) => (
                      <Choice
-                        {...register('paymentMethod')}
+                        {...register('paymentGateway')}
                         type="radio"
-                        label={paymentMethod.name}
-                        value={paymentMethod.id}
-                        key={paymentMethod.id}
+                        label={paymentGateway.name}
+                        value={paymentGateway.id}
+                        key={paymentGateway.id}
                      />
                   ))}
-                  {errors.paymentMethod && (
-                     <p className="mt-2 text-sm text-error">{errors.paymentMethod.message}</p>
+                  {errors.paymentGateway && (
+                     <p className="mt-2 text-sm text-error">{errors.paymentGateway.message}</p>
                   )}
                </div>
                <p className="mb-8 pt-5 border-t border-soft text-sm leading-snug">
